@@ -28,10 +28,17 @@ node index.js
    - `SERPAPI_API_KEY` — your SerpAPI key
 4. Railway auto-detects Node.js and runs `npm start`
 
+## Restricting Access
+
+To limit the bot to specific users, set `ALLOWED_USER_IDS` to a comma-separated list of
+Telegram user IDs. Leave it empty to allow everyone.
+
+To find your Telegram user ID, message **@userinfobot** in Telegram — it replies with your numeric ID.
+
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `BOT_TOKEN` | Telegram bot token from @BotFather |
 | `SERPAPI_API_KEY` | SerpAPI API key from serpapi.com/manage-api-key |
-"# telegram-flight-bot" 
+| `ALLOWED_USER_IDS` | Optional. Comma-separated Telegram user IDs (e.g. `123456789,987654321`). Leave empty to allow all users. |

@@ -4,8 +4,21 @@ const { Telegraf } = require('telegraf');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const SERPAPI_KEY = process.env.SERPAPI_API_KEY;
 
-if (!BOT_TOKEN) throw new Error('BOT_TOKEN is not set in environment');
+if (!BOT_TOKEN)  throw new Error('BOT_TOKEN is not set in environment');
 if (!SERPAPI_KEY) throw new Error('SERPAPI_API_KEY is not set in environment');
+
+// Comma-separated list of allowed Telegram user IDs, e.g. "123456789,987654321"
+// If empty or unset, the bot is open to everyone.
+const ALLOWED_IDS = (process.env.ALLOWED_USER_IDS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean)
+  .map(Number);
+
+function isAllowed(ctx) {
+  if (ALLOWED_IDS.length === 0) return true;          // no restriction set
+  return ALLOWED_IDS.includes(ctx.from?.id);
+}
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -185,10 +198,18 @@ function buildReply(data, origin, destination, date) {
 
 // ── Bot handlers ─────────────────────────────────────────────────────────────
 
-bot.start(ctx => ctx.replyWithMarkdown(WELCOME_MSG));
-bot.help(ctx  => ctx.replyWithMarkdown(WELCOME_MSG));
+bot.start(ctx => {
+  if (!isAllowed(ctx)) return ctx.reply('⛔ You are not authorised to use this bot.');
+  return ctx.replyWithMarkdown(WELCOME_MSG);
+});
+bot.help(ctx => {
+  if (!isAllowed(ctx)) return ctx.reply('⛔ You are not authorised to use this bot.');
+  return ctx.replyWithMarkdown(WELCOME_MSG);
+});
 
 bot.on('text', async ctx => {
+  if (!isAllowed(ctx)) return ctx.reply('⛔ You are not authorised to use this bot.');
+
   const text = ctx.message.text.trim();
 
   // Ignore commands that aren't /start or /help
